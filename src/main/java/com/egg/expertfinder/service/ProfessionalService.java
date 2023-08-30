@@ -5,7 +5,7 @@ import com.egg.expertfinder.entity.Image;
 import com.egg.expertfinder.entity.Job;
 import com.egg.expertfinder.entity.Location;
 import com.egg.expertfinder.entity.Professional;
-import com.egg.expertfinder.exception.MyException;
+import com.egg.expertfinder.exception.EntityNotFoundException;
 import com.egg.expertfinder.repository.ProfessionalRepository;
 import com.egg.expertfinder.repository.UserRepository;
 import java.util.List;
@@ -38,9 +38,9 @@ public class ProfessionalService {
     @Transactional
     public void createProfessional(String name, String lastName, String email, String password,
             String password2, String address, MultipartFile file, Long idJob,
-            String description, String license, String phone) throws MyException {
+            String description, String license, String phone) throws IllegalArgumentException {
 
-        validate(name, lastName, email, password, password2, file, idJob, description, license, phone,address);
+        validate(name, lastName, email, password, password2, file, idJob, description, license, phone, address);
 
         Professional professional = new Professional(name, lastName, email,
                 description, license, phone);
@@ -65,7 +65,7 @@ public class ProfessionalService {
 
     @Transactional
     public void updateProfessional(Long id, String name, String lastName, String email,
-            MultipartFile file, String description, String phone) throws MyException {
+            MultipartFile file, String description, String phone) throws IllegalArgumentException {
         Optional<Professional> response = professionalRepository.findById(id);
         if (response.isPresent()) {
             Professional professional = response.get();
@@ -76,7 +76,7 @@ public class ProfessionalService {
                 Professional proEmail = professionalRepository.findProfessionalByEmail(email);
                 CustomUser userEmail = userRepository.findCustomUserByEmail(email);
                 if (proEmail != null || userEmail != null) {
-                    throw new MyException("Ya existe un profesional registrado con ese email.");
+                    throw new IllegalArgumentException("Ya existe un profesional registrado con ese email.");
                 } else {
                     professional.setEmail(email);
                 }
@@ -94,177 +94,177 @@ public class ProfessionalService {
     }
 
     @Transactional
-    public void deactivateProfessional(Long id) throws MyException {
+    public void deactivateProfessional(Long id) throws EntityNotFoundException {
         Optional<Professional> response = professionalRepository.findById(id);
         if (response.isPresent()) {
             Professional professional = response.get();
             professional.deactivateProfessional();
             professionalRepository.save(professional);
         } else {
-            throw new MyException("No se encontró un profesional con ese ID.");
+            throw new EntityNotFoundException(Professional.class, id);
         }
     }
 
     @Transactional
-    public void activateProfessional(Long id) throws MyException {
+    public void activateProfessional(Long id) throws EntityNotFoundException {
         Optional<Professional> response = professionalRepository.findById(id);
         if (response.isPresent()) {
             Professional professional = response.get();
             professional.activateProfessional();
             professionalRepository.save(professional);
         } else {
-            throw new MyException("No se encontró un profesional con ese ID.");
+            throw new EntityNotFoundException(Professional.class, id);
         }
     }
 
     @Transactional
-    public void deleteProfessional(Long id) throws MyException {
+    public void deleteProfessional(Long id) throws EntityNotFoundException {
         Optional<Professional> response = professionalRepository.findById(id);
         if (response.isPresent()) {
             professionalRepository.delete(response.get());
         } else {
-            throw new MyException("No se encontró un profesional con ese ID.");
+            throw new EntityNotFoundException(Professional.class, id);
         }
     }
 
     //Validación de datos del profesional.
     public void validate(String name, String lastName, String email, String password,
             String password2, MultipartFile file, Long idJob, String description,
-            String license, String phone,String address) throws MyException {
+            String license, String phone,String address) throws IllegalArgumentException {
         
         if (name == null || name.isEmpty()) {
-            throw new MyException("El nombre no puede ser nulo o estar vacío.");
+            throw new IllegalArgumentException("El nombre no puede ser nulo o estar vacío.");
         }
         if (lastName == null || lastName.isEmpty()) {
-            throw new MyException("El apellido no puede ser nulo o estar vacío.");
+            throw new IllegalArgumentException("El apellido no puede ser nulo o estar vacío.");
         }
         if (password == null || password.isEmpty()) {
-            throw new MyException("La contraseña no puede ser nula o estar vacía.");
+            throw new IllegalArgumentException("La contraseña no puede ser nula o estar vacía.");
         }
         if (password.length() <= 5) {
-            throw new MyException("La contraseña no puede contener 5 caracteres o menos.");
+            throw new IllegalArgumentException("La contraseña no puede contener 5 caracteres o menos.");
         }
         if (!password2.equals(password)) {
-            throw new MyException("Las contraseñas no coinciden.");
+            throw new IllegalArgumentException("Las contraseñas no coinciden.");
         }
         if (file == null || file.isEmpty()) {
-            throw new MyException("Debe ingresar una imagen de perfil.");
+            throw new IllegalArgumentException("Debe ingresar una imagen de perfil.");
         }
         if (idJob == null) {
-            throw new MyException("Debe ingresar un servicio a ofrecer.");
+            throw new IllegalArgumentException("Debe ingresar un servicio a ofrecer.");
         }
         if (description == null || description.isEmpty()) {
-            throw new MyException("Debe ingresar una descripción.");
+            throw new IllegalArgumentException("Debe ingresar una descripción.");
         }
         if (license == null || license.isEmpty()) {
-            throw new MyException("Debe presentar su matrícula.");
+            throw new IllegalArgumentException("Debe presentar su matrícula.");
         }
         if (phone == null || phone.isEmpty()) {
-            throw new MyException("Debe ingresar su número de teléfono.");
+            throw new IllegalArgumentException("Debe ingresar su número de teléfono.");
                }else {
                        for (int j = 0; j <= phone.length()-1 ; j++) {
                            try {
                                Integer.parseInt( phone.substring(j,j+1));
                            } catch (Exception e) {
-                               throw new MyException("El numero de telefono debe ser solo numeros");
+                               throw new IllegalArgumentException("El numero de telefono debe ser solo numeros");
                            }
                        }
         }
         if (address==null || address.isEmpty()){
-            throw new MyException("Debe ingresar una direccion");
+            throw new IllegalArgumentException("Debe ingresar una direccion");
         }
         if (email==null || email.isEmpty()) {
-            throw new MyException("Debe ingresar un correo");
+            throw new IllegalArgumentException("Debe ingresar un correo");
         }else if(!email.contains("@")){
-            throw new MyException("El correo debe poseer '@'");
+            throw new IllegalArgumentException("El correo debe poseer '@'");
         }else if(email.substring(email.length()-1).equals("@")){
-            throw new MyException("El correo debe poseer caracteres luego de la '@'");
+            throw new IllegalArgumentException("El correo debe poseer caracteres luego de la '@'");
         }
     }
        public void validateAll(String name, String lastName, String email, String password,
             String password2, MultipartFile file, Long idJob, String description,
-            String license, String phone,String address,int num) throws MyException {
+            String license, String phone,String address,int num) throws IllegalArgumentException {
         
            switch (num) {
                case 1:
                    if (name == null || name.isEmpty()) {
-                       throw new MyException("El nombre no puede ser nulo o estar vacío.");
+                       throw new IllegalArgumentException("El nombre no puede ser nulo o estar vacío.");
                    }
                    break;
                case 2:
                    if (lastName == null || lastName.isEmpty()) {
-                       throw new MyException("El apellido no puede ser nulo o estar vacío.");
+                       throw new IllegalArgumentException("El apellido no puede ser nulo o estar vacío.");
                    }
                    break;
                case 3:
                    if (password == null || password.isEmpty()) {
-                      throw new MyException("La contraseña no puede ser nula o estar vacía.");
+                      throw new IllegalArgumentException("La contraseña no puede ser nula o estar vacía.");
                    }else if(password.length() <= 5){
-                       throw new MyException("La contraseña no puede contener 5 caracteres o menos.");
+                       throw new IllegalArgumentException("La contraseña no puede contener 5 caracteres o menos.");
                    }
                    break;
                case 4:
                    if (!password2.equals(password)) {
-                       throw new MyException("Las contraseñas no coinciden.");
+                       throw new IllegalArgumentException("Las contraseñas no coinciden.");
                    }
                    break;
                case 5:
                    if (address == null || address.isEmpty()) {
-                       throw new MyException("Debe ingresar una direccion");
+                       throw new IllegalArgumentException("Debe ingresar una direccion");
                    }
                    break;
                case 6:
                    if (file == null || file.isEmpty()) {
-                       throw new MyException("Debe ingresar una imagen de perfil.");
+                       throw new IllegalArgumentException("Debe ingresar una imagen de perfil.");
                    }
                    break;
                case 7:
                    if (idJob == null) {
-                       throw new MyException("Debe ingresar un servicio a ofrecer.");
+                       throw new IllegalArgumentException("Debe ingresar un servicio a ofrecer.");
                    }
                    break;
                case 8:
                    if (description == null || description.isEmpty()) {
-                       throw new MyException("Debe ingresar una descripción.");
+                       throw new IllegalArgumentException("Debe ingresar una descripción.");
                    }
                    break;
                case 9:
                    if (license == null || license.isEmpty()) {
-                       throw new MyException("Debe presentar su matrícula.");
+                       throw new IllegalArgumentException("Debe presentar su matrícula.");
                    }
                    break;
                case 10:
                    if (phone == null || phone.isEmpty()) {
-                       throw new MyException("Debe ingresar su número de teléfono.");
+                       throw new IllegalArgumentException("Debe ingresar su número de teléfono.");
                     }else {            
                        for (int j = 0; j <= phone.length()-1 ; j++) {
                            try {
                                Integer.parseInt( phone.substring(j,j+1));
                            } catch (Exception e) {
-                               throw new MyException("El numero de telefono debe ser solo numeros");
+                               throw new IllegalArgumentException("El numero de telefono debe ser solo numeros");
                            }
                        }
                    }
                        break;
                 case 11:
                     if (email == null || email.isEmpty()) {
-                        throw new MyException("Debe ingresar un correo");
+                        throw new IllegalArgumentException("Debe ingresar un correo");
                     } else if (!email.contains("@")) {
-                        throw new MyException("El correo debe poseer '@'");
+                        throw new IllegalArgumentException("El correo debe poseer '@'");
                     } else if (email.substring(email.length() - 1).equals("@")) {
-                        throw new MyException("El correo debe poseer caracteres luego de la '@'");
+                        throw new IllegalArgumentException("El correo debe poseer caracteres luego de la '@'");
                     }
                        break;
            }
     }
 
     //Obtener un profesional de la base de datos usando su ID.
-    public Professional getProfessionalById(Long id) throws MyException {
+    public Professional getProfessionalById(Long id) throws EntityNotFoundException {
         Optional<Professional> response = professionalRepository.findById(id);
         if (response.isPresent()) {
             return response.get();
         } else {
-            throw new MyException("No se encontró un profesional con ese ID.");
+            throw new EntityNotFoundException(Professional.class, id);
         }
     }
 

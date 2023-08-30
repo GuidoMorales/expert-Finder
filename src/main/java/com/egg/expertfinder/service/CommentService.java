@@ -3,7 +3,7 @@ package com.egg.expertfinder.service;
 import com.egg.expertfinder.entity.Comment;
 import com.egg.expertfinder.entity.Professional;
 import com.egg.expertfinder.entity.Task;
-import com.egg.expertfinder.exception.MyException;
+import com.egg.expertfinder.exception.EntityNotFoundException;
 import com.egg.expertfinder.repository.CommentRepository;
 import com.egg.expertfinder.repository.ProfessionalRepository;
 import com.egg.expertfinder.repository.TaskRepository;
@@ -32,8 +32,7 @@ public class CommentService {
     private ProfessionalRepository professionalRepository;
 
     @Transactional
-    public void createComment(Long idTask, Long idUser, Long idProfessional,
-            String content, Double score) throws MyException, Exception {
+    public void createComment(Long idTask, Long idUser, Long idProfessional, String content, Double score) throws IllegalArgumentException {
 
         validate(idTask, idUser, idProfessional, content, score);
 
@@ -54,16 +53,16 @@ public class CommentService {
                 professional.getComments().add(comment);
                 professionalRepository.save(professional);
             } else {
-                throw new MyException("Ya existe un comentario en esta tarea.");
+                throw new IllegalArgumentException("Ya existe un comentario en esta tarea.");
             }
 
         } else {
-            throw new MyException("No existe una tarea con ese Id.");
+            throw new IllegalArgumentException("No existe una tarea con ese Id.");
         }
     }
 
     @Transactional
-    public void reportComment(Long idComment) throws MyException {
+    public void reportComment(Long idComment) throws EntityNotFoundException {
         Optional<Comment> response = commentRepository.findById(idComment);
         if (response.isPresent()) {
             Comment comment = response.get();
@@ -72,12 +71,12 @@ public class CommentService {
             commentRepository.save(comment);
 
         } else {
-            throw new MyException("No se encontró el comentario con ese Id.");
+            throw new EntityNotFoundException(Comment.class, idComment);
         }
     }
 
     @Transactional
-    public void updateComment(Long idTask, Long idUser, String content) throws MyException {
+    public void updateComment(Long idTask, Long idUser, String content) throws IllegalArgumentException {
         Optional<Task> response = taskRepository.findById(idTask);
         if (response.isPresent()) {
             Comment comment = response.get().getComment();
@@ -85,10 +84,10 @@ public class CommentService {
                 comment.setContent(content);
                 commentRepository.save(comment);
             } else {
-                throw new MyException("No existe un comentario con ese id o el usuario no corresponde.");
+                throw new IllegalArgumentException("No existe un comentario con ese id o el usuario no corresponde.");
             }
         } else {
-            throw new MyException("No existe una tarea con ese Id.");
+            throw new IllegalArgumentException("No existe una tarea con ese Id.");
         }
     }
 
@@ -96,12 +95,12 @@ public class CommentService {
         return commentRepository.findAll();
     }
 
-    public Comment getCommentById(Long id) throws MyException {
+    public Comment getCommentById(Long id) throws EntityNotFoundException {
         Optional<Comment> response = commentRepository.findById(id);
         if (response.isPresent()) {
             return response.get();
         } else {
-            throw new MyException("No se encontró un comentario con ese ID.");
+            throw new EntityNotFoundException(Comment.class, id);
         }
     }
 
@@ -110,14 +109,14 @@ public class CommentService {
     }
 
     @Transactional
-    public void deactivateCommentById(Long id) throws MyException {
+    public void deactivateCommentById(Long id) throws EntityNotFoundException {
         Optional<Comment> response = commentRepository.findById(id);
         if (response.isPresent()) {
             Comment comment = response.get();
             comment.deactivateComment();
             commentRepository.save(comment);
         } else {
-            throw new MyException("No se encontró el comentario.");
+            throw new EntityNotFoundException(Comment.class, id);
         }
     }
     
@@ -125,22 +124,21 @@ public class CommentService {
         return commentRepository.findCommentsByProfessionalId(id);
     }
 
-    private void validate(Long idTask, Long idUser, Long idProfessional, String content, Double score) throws MyException {
+    private void validate(Long idTask, Long idUser, Long idProfessional, String content, Double score) throws IllegalArgumentException {
         if (idTask == null) {
-            throw new MyException("No se ingresó el Id de la tarea.");
+            throw new IllegalArgumentException("No se ingresó el Id de la tarea.");
         }
         if (idUser == null) {
-            throw new MyException("No se ingresó el Id del Usuario.");
+            throw new IllegalArgumentException("No se ingresó el Id del Usuario.");
         }
         if (idProfessional == null) {
-            throw new MyException("No se ingresó el Id del Professional.");
+            throw new IllegalArgumentException("No se ingresó el Id del Professional.");
         }
         if (content == null || content.isEmpty()) {
-            throw new MyException("El contenido del comentario no puede estar vacio.");
+            throw new IllegalArgumentException("El contenido del comentario no puede estar vacio.");
         }
         if (score == null) {
-            throw new MyException("Debe ingresar una valoración por el trabajo.");
+            throw new IllegalArgumentException("Debe ingresar una valoración por el trabajo.");
         }
     }
-
 }

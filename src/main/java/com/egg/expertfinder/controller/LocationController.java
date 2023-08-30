@@ -1,6 +1,6 @@
 package com.egg.expertfinder.controller;
 
-import com.egg.expertfinder.exception.MyException;
+import com.egg.expertfinder.exception.EntityNotFoundException;
 import com.egg.expertfinder.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,7 +26,7 @@ public class LocationController {
             locationService.updateLocation(id, country, address);
             model.put("exito", "Se editó la ubicación correctamente.");
             return "redirect:/home";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "";
         }

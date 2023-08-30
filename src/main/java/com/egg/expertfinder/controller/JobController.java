@@ -1,7 +1,7 @@
 package com.egg.expertfinder.controller;
 
 import com.egg.expertfinder.entity.Job;
-import com.egg.expertfinder.exception.MyException;
+import com.egg.expertfinder.exception.EntityNotFoundException;
 import com.egg.expertfinder.service.JobService;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class JobController {
             jobService.createJob(name, file);
             model.put("exito", "Se creó con éxito el Servicio.");
             return "redirect:/admin/dashboard";
-        } catch (MyException ex) {
+        } catch (IllegalArgumentException ex) {
             model.put("error", ex.getMessage());
             return "job-register.html";
         }
@@ -49,7 +49,7 @@ public class JobController {
             Job job = jobService.getJobById(id);
             model.addAttribute("job", job);
             return "job-update.html";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "job-update.html";
         }
@@ -63,7 +63,7 @@ public class JobController {
             jobService.updateJob(id, name, file);
             model.put("exito", "Se editó el Servicio correctamente.");
             return "redirect:/admin/home";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "job-update.html";
         }
@@ -84,7 +84,7 @@ public class JobController {
             jobService.deleteJob(id);
             model.put("exito", "Se eliminó el Servicio correctamente.");
             return "redirect:/admin/dashboard";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/admin/dashboard";
         }

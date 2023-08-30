@@ -1,7 +1,7 @@
 package com.egg.expertfinder.service;
 
 import com.egg.expertfinder.entity.Image;
-import com.egg.expertfinder.exception.MyException;
+import com.egg.expertfinder.exception.EntityNotFoundException;
 import com.egg.expertfinder.repository.ImageRepository;
 import java.io.IOException;
 import java.util.Optional;
@@ -57,12 +57,12 @@ public class ImageService {
     }
 
 //  Retornamos una Image
-    public Image getImage(Long idImage) throws MyException {
+    public Image getImage(Long idImage) throws EntityNotFoundException {
         Optional<Image> response = imageRepository.findById(idImage);
         if (response.isPresent()) {
             return response.get();
         } else {
-            throw new MyException("No se encontró una imagen.");
+            throw new EntityNotFoundException(Image.class, idImage);
         }
     }
 }

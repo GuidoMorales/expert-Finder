@@ -1,7 +1,7 @@
 package com.egg.expertfinder.service;
 
 import com.egg.expertfinder.entity.Location;
-import com.egg.expertfinder.exception.MyException;
+import com.egg.expertfinder.exception.EntityNotFoundException;
 import com.egg.expertfinder.repository.LocationRepository;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ public class LocationService {
     private LocationRepository locationRepository;
 
     @Transactional
-    public Location createLocation(String country, String address) throws MyException {
+    public Location createLocation(String country, String address) throws IllegalArgumentException {
 
         validate(address);
         
@@ -25,29 +25,29 @@ public class LocationService {
     }
 
     @Transactional
-    public void updateLocation(Long id, String country, String address) throws MyException {
+    public void updateLocation(Long id, String country, String address) throws EntityNotFoundException {
         Optional<Location> response = locationRepository.findById(id);
         if (response.isPresent()) {
             Location location = response.get();
             location.updateLocation(country, address);
             locationRepository.save(location);
         } else {
-            throw new MyException("No se pudo modificar la ubicación.");
+            throw new EntityNotFoundException(Location.class, id);
         }
     }
 
-    public Location getLocation(Long id) throws MyException {
+    public Location getLocation(Long id) throws EntityNotFoundException {
         Optional<Location> response = locationRepository.findById(id);
         if (response.isPresent()) {
             return response.get();
         } else {
-            throw new MyException("No se pudo hallar la ubicación.");
+            throw new EntityNotFoundException(Location.class, id);
         }
     }
 
-    private void validate(String address) throws MyException {
+    private void validate(String address) throws IllegalArgumentException {
         if (address == null || address.isEmpty()) {
-            throw new MyException("Debe ingresar la dirección.");
+            throw new IllegalArgumentException("Debe ingresar la dirección.");
         }
     }
 }

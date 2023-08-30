@@ -1,12 +1,11 @@
 package com.egg.expertfinder.controller;
 
 import com.egg.expertfinder.entity.Comment;
-import com.egg.expertfinder.exception.MyException;
+import com.egg.expertfinder.exception.EntityNotFoundException;
 import com.egg.expertfinder.service.CommentService;
 import com.egg.expertfinder.service.TaskService;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -41,7 +40,7 @@ public class CommentController {
         try {
             model.addAttribute("task", taskService.getTaskById(idTask));
             return "comment-form.html";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/home";
         }
@@ -57,7 +56,7 @@ public class CommentController {
             commentService.createComment(idTask, idUser, idProfessional, content, score);
             model.put("exito", "El comentario fue registrado.");
             return "redirect:/home";
-        } catch (Exception ex) {
+        } catch (IllegalArgumentException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/home";
         }
@@ -71,7 +70,7 @@ public class CommentController {
             Comment comment = commentService.getCommentById(id);
             model.addAttribute("comment", comment);
             return "update-comment.html";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/professional/profile/";
         }
@@ -85,7 +84,7 @@ public class CommentController {
             commentService.updateComment(idTask, idUser, content);
             model.put("exito", "Se editó el comentario correctamente.");
             return "redirect:/admin/home";
-        } catch (MyException ex) {
+        } catch (IllegalArgumentException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/admin/home";
         }
@@ -106,7 +105,7 @@ public class CommentController {
             commentService.deactivateCommentById(id);
             model.put("exito", "El comentario se desactivó con éxito.");
             return "redirect:/admin/dashboard";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/admin/comments-reports";
         }
@@ -128,7 +127,7 @@ public class CommentController {
             commentService.reportComment(id);
             model.put("exito", "El Comentario Fué Reportado.");
             return "redirect:/home";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/home";
         }
