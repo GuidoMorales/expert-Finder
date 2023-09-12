@@ -1,11 +1,10 @@
 package com.egg.expertfinder.service;
 
-import com.egg.expertfinder.entity.Comment;
 import com.egg.expertfinder.entity.CustomUser;
 import com.egg.expertfinder.entity.Professional;
 import com.egg.expertfinder.entity.Task;
 import com.egg.expertfinder.enumeration.StatusEnum;
-import com.egg.expertfinder.exception.MyException;
+import com.egg.expertfinder.exception.EntityNotFoundException;
 import com.egg.expertfinder.repository.ProfessionalRepository;
 import com.egg.expertfinder.repository.TaskRepository;
 import com.egg.expertfinder.repository.UserRepository;
@@ -32,7 +31,7 @@ public class TaskService {
 
     @Transactional
     public void createTask(String title, String description, Long idProfessional, 
-            Long idUser) throws MyException {
+            Long idUser) throws IllegalArgumentException {
 
         validate(title, description, idProfessional, idUser);
 
@@ -59,7 +58,7 @@ public class TaskService {
     }
 
     @Transactional
-    public void updateTask(Long idTask, String newStatus) throws MyException {
+    public void updateTask(Long idTask, String newStatus) throws EntityNotFoundException {
         Optional<Task> response = taskRepository.findById(idTask);
         if (response.isPresent()) {
             Task task = response.get();
@@ -81,7 +80,7 @@ public class TaskService {
             
             taskRepository.save(task);
         } else {
-            throw new MyException("No se encontró una tarea con ese Id.");
+            throw new EntityNotFoundException(Task.class, idTask);
         }
     }
 
@@ -89,12 +88,12 @@ public class TaskService {
         return taskRepository.findAll();
     }
 
-    public Task getTaskById(Long id) throws MyException {
+    public Task getTaskById(Long id) throws EntityNotFoundException {
         Optional<Task> response = taskRepository.findById(id);
         if (response.isPresent()) {
             return response.get();
         } else {
-            throw new MyException("No se encontró la tarea.");
+            throw new EntityNotFoundException(Task.class, id);
         }
     }
 
@@ -115,27 +114,27 @@ public class TaskService {
     }
 
     @Transactional
-    public void deleteTaskById(Long id) throws MyException {
+    public void deleteTaskById(Long id) throws EntityNotFoundException {
         Optional<Task> response = taskRepository.findById(id);
         if (response.isPresent()) {
             taskRepository.delete(response.get());
         } else {
-            throw new MyException("No se encontró una Tarea con ese Id.");
+            throw new EntityNotFoundException(Task.class, id);
         }
     }
 
-    private void validate(String title, String description, Long idProfessional, Long idUser) throws MyException {
+    private void validate(String title, String description, Long idProfessional, Long idUser) throws IllegalArgumentException {
         if (title == null || title.isEmpty()) {
-            throw new MyException("Debe ingresar un título a la tarea.");
+            throw new IllegalArgumentException("Debe ingresar un título a la tarea.");
         }
         if (description == null || description.isEmpty()) {
-            throw new MyException("La tarea no puede estar vacia.");
+            throw new IllegalArgumentException("La tarea no puede estar vacia.");
         }
         if (idProfessional == null) {
-            throw new MyException("El id del profesional no puede ser nulo.");
+            throw new IllegalArgumentException("El id del profesional no puede ser nulo.");
         }
         if (idUser == null) {
-            throw new MyException("El id del usuario no puede ser nulo.");
+            throw new IllegalArgumentException("El id del usuario no puede ser nulo.");
         }
     }
 

@@ -2,7 +2,6 @@ package com.egg.expertfinder.controller;
 
 import com.egg.expertfinder.entity.CustomUser;
 import com.egg.expertfinder.entity.Job;
-import com.egg.expertfinder.exception.MyException;
 import com.egg.expertfinder.service.JobService;
 import com.egg.expertfinder.service.ProfessionalService;
 import com.egg.expertfinder.service.UserService;
@@ -59,7 +58,7 @@ public class HomeController {
                     country, address, file);
             model.put("exito", "Usuario registrado.");
             return "redirect:/login";
-        } catch (MyException e) {
+        } catch (IllegalArgumentException e) {
             model.put("name", name);
             model.put("lastName", lastName);
             model.put("address", address);
@@ -67,18 +66,18 @@ public class HomeController {
             try {
                 userService.validateAll(name, lastName, email, password, password2, countryKey, address, file, 7);
                 model.put("countryKey", countryKey);
-            } catch (MyException ex) {
+            } catch (IllegalArgumentException ex) {
             }
             try {
                 userService.validateAll(name, lastName, email, password, password2, countryKey, address, file, 8);
                 model.put("email", email);
-            } catch (MyException ex) {
+            } catch (IllegalArgumentException ex) {
             }
             int i = 1;
             do {
                 try {
                     userService.validateAll(name, lastName, email, password, password2, countryKey, address, file, i);
-                } catch (MyException ex) {
+                } catch (IllegalArgumentException ex) {
                     model.put("error" + i, ex.getMessage());
                 } finally {
                     i++;
@@ -106,7 +105,7 @@ public class HomeController {
                     address, file, idJob, description, license, phone);
             model.put("exito", "Usuario registrado.");
             return "redirect:/login";
-        } catch (MyException ex) {
+        } catch (IllegalArgumentException ex) {
             List<Job> jobs = jobService.getAllJobs();
             model.addAttribute("jobs", jobs);
             model.put("name", name);
@@ -118,18 +117,18 @@ public class HomeController {
             try {
                 professionalService.validateAll(name, lastName, email, password, password2, file, idJob, description, license, phone, address, 10);
                 model.put("phone", phone);
-            } catch (MyException e) {
+            } catch (IllegalArgumentException e) {
             }
             try {
                 professionalService.validateAll(name, lastName, email, password, password2, file, idJob, description, license, phone, address, 11);
                 model.put("email", email);
-            } catch (MyException e) {
+            } catch (IllegalArgumentException e) {
             }
             int i = 1;
             do {
                 try {
                     professionalService.validateAll(name, lastName, email, password, password2, file, idJob, description, license, phone, address, i);
-                } catch (MyException e) {
+                } catch (IllegalArgumentException e) {
                     model.put("error" + i, e.getMessage());
                 } finally {
                     i++;

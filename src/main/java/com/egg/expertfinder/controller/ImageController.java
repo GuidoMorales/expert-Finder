@@ -4,7 +4,6 @@ import com.egg.expertfinder.entity.CustomUser;
 import com.egg.expertfinder.entity.Image;
 import com.egg.expertfinder.entity.Job;
 import com.egg.expertfinder.entity.Professional;
-import com.egg.expertfinder.exception.MyException;
 import com.egg.expertfinder.service.ImageService;
 import com.egg.expertfinder.service.JobService;
 import com.egg.expertfinder.service.ProfessionalService;
@@ -38,7 +37,7 @@ public class ImageController {
     
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_PRO', 'ROLE_ADMIN')")
     @GetMapping("/profile-user/{id}")
-    public ResponseEntity<byte[]> imageUser(@PathVariable Long id) throws Exception {
+    public ResponseEntity<byte[]> imageUser(@PathVariable Long id) throws IllegalArgumentException {
         
         CustomUser user = userService.getUserById(id);
         
@@ -52,7 +51,7 @@ public class ImageController {
     }
     
     @GetMapping("/profile-professional/{id}")
-    public ResponseEntity<byte[]> imageProfessional(@PathVariable Long id) throws Exception {
+    public ResponseEntity<byte[]> imageProfessional(@PathVariable Long id) throws IllegalArgumentException {
         
         Professional professional = professionalService.getProfessionalById(id);
         
@@ -66,7 +65,7 @@ public class ImageController {
     }
     
     @GetMapping("/job/{id}")
-    public ResponseEntity<byte[]> imageJob(@PathVariable Long id) throws MyException {
+    public ResponseEntity<byte[]> imageJob(@PathVariable Long id) throws IllegalArgumentException {
         
         Job job = jobService.getJobById(id);
         
@@ -81,7 +80,7 @@ public class ImageController {
     
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_PRO', 'ROLE_ADMIN')")
     @GetMapping("/{id}")
-    public ResponseEntity<byte[]> imageById(@PathVariable Long id) throws MyException {
+    public ResponseEntity<byte[]> imageById(@PathVariable Long id) throws IllegalArgumentException {
         
         Image image = imageService.getImage(id);
         

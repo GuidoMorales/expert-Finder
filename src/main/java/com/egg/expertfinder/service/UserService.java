@@ -4,12 +4,11 @@ import com.egg.expertfinder.entity.Image;
 import com.egg.expertfinder.entity.CustomUser;
 import com.egg.expertfinder.entity.Location;
 import com.egg.expertfinder.enumeration.KeyEnum;
-import com.egg.expertfinder.exception.MyException;
+import com.egg.expertfinder.exception.EntityNotFoundException;
 import com.egg.expertfinder.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -41,12 +40,12 @@ public class UserService implements UserDetailsService {
     @Transactional
     public void createUser(String name, String lastName, String email, String password,
             String password2, String countryKey, String country, String address,
-            MultipartFile file) throws MyException {
+            MultipartFile file) throws IllegalArgumentException {
 
         validate(name, lastName, email, password, password2, countryKey, file);
 
         if (userRepository.findCustomUserByEmail(email) != null) {
-            throw new MyException("Ya existe un usuario con ese email.");
+            throw new IllegalArgumentException("Ya existe un usuario con ese email.");
         }
 
         CustomUser user = new CustomUser(name, lastName, email);
@@ -67,7 +66,7 @@ public class UserService implements UserDetailsService {
 //  Actualización de un User
     @Transactional
     public void updateUser(Long id, String name, String lastName, String email,
-            MultipartFile file) throws MyException {
+            MultipartFile file) throws IllegalArgumentException {
 
 //      Corroboramos que exista el User con el Id que llega
         Optional<CustomUser> response = userRepository.findById(id);
@@ -81,7 +80,7 @@ public class UserService implements UserDetailsService {
             if (email != null) {
                 CustomUser userEmail = userRepository.findCustomUserByEmail(email);
                 if (userEmail != null) {
-                    throw new MyException("Ya existe un usuario con ese Email.");
+                    throw new IllegalArgumentException("Ya existe un usuario con ese Email.");
                 } else {
                     user.setEmail(email);
                 }
@@ -99,12 +98,12 @@ public class UserService implements UserDetailsService {
     }
 
 //  Traemos un User si es que existe
-    public CustomUser getUserById(Long id) throws Exception {
+    public CustomUser getUserById(Long id) throws EntityNotFoundException {
         Optional<CustomUser> response = userRepository.findById(id);
         if (response.isPresent()) {
             return response.get();
         } else {
-            throw new Exception("No se encontró al usuario.");
+            throw new EntityNotFoundException(CustomUser.class, id);
         }
     }
 
@@ -130,115 +129,115 @@ public class UserService implements UserDetailsService {
 
 //  Eliminamos un User
     @Transactional
-    public void deleteUser(Long id) throws Exception {
+    public void deleteUser(Long id) throws EntityNotFoundException {
         Optional<CustomUser> response = userRepository.findById(id);
         if (response.isPresent()) {
             userRepository.delete(response.get());
         } else {
-            throw new Exception("No se encontró al usuario");
+            throw new EntityNotFoundException(CustomUser.class, id);
         }
     }
 
     @Transactional
-    public void deactivateUser(Long id) throws MyException {
+    public void deactivateUser(Long id) throws EntityNotFoundException {
         Optional<CustomUser> response = userRepository.findById(id);
         if (response.isPresent()) {
             CustomUser user = response.get();
             user.deactivateUser();
             userRepository.save(user);
         } else {
-            throw new MyException("No se encontró al usuario con ese id.");
+            throw new EntityNotFoundException(CustomUser.class, id);
         }
     }
 
 //  Validamos que lleguen los datos necesarios para crear un User
     private void validate(String name, String lastName, String email, String password,
-            String password2, String countryKey, MultipartFile file) throws MyException {
+            String password2, String countryKey, MultipartFile file) throws IllegalArgumentException {
         if (name == null || name.isEmpty()) {
-            throw new MyException("El nombre no debe estar vacío.");
+            throw new IllegalArgumentException("El nombre no debe estar vacío.");
         }
         if (lastName == null || lastName.isEmpty()) {
-            throw new MyException("El apellido no debe estar vacío.");
+            throw new IllegalArgumentException("El apellido no debe estar vacío.");
         }
         if (email == null || email.isEmpty()) {
-            throw new MyException("Debe ingresar un correo");
+            throw new IllegalArgumentException("Debe ingresar un correo");
         } else if (!email.contains("@")) {
-            throw new MyException("El correo debe poseer '@'");
+            throw new IllegalArgumentException("El correo debe poseer '@'");
         } else if (email.substring(email.length() - 1).equals("@")) {
-            throw new MyException("El correo debe poseer caracteres luego de la '@'");
+            throw new IllegalArgumentException("El correo debe poseer caracteres luego de la '@'");
         }
         if (!password.equals(password2)) {
-            throw new MyException("Las contraseñas no coinciden.");
+            throw new IllegalArgumentException("Las contraseñas no coinciden.");
         }
         if (password == null || password.isEmpty()) {
-            throw new MyException("La contraseña no puede ser nula o estar vacía.");
+            throw new IllegalArgumentException("La contraseña no puede ser nula o estar vacía.");
         }
         if (password.length() <= 5) {
-            throw new MyException("La contraseña no puede contener 5 caracteres o menos.");
+            throw new IllegalArgumentException("La contraseña no puede contener 5 caracteres o menos.");
         }
         if (countryKey == null || countryKey.isEmpty()) {
-            throw new MyException("Debe ingresar la clave del Barrio.");
+            throw new IllegalArgumentException("Debe ingresar la clave del Barrio.");
         }
         if (file == null || file.isEmpty()) {
-            throw new MyException("Debe ingresar una imagen de perfil.");
+            throw new IllegalArgumentException("Debe ingresar una imagen de perfil.");
         }
     }
 
     public void validateAll(String name, String lastName, String email, String password,
-            String password2, String countryKey, String address, MultipartFile file, int num) throws MyException {
+            String password2, String countryKey, String address, MultipartFile file, int num) throws IllegalArgumentException {
         switch (num) {
             case 1:
                 if (name == null || name.isEmpty()) {
-                    throw new MyException("El nombre no puede ser nulo o estar vacío.");
+                    throw new IllegalArgumentException("El nombre no puede ser nulo o estar vacío.");
                 }
                 break;
             case 2:
                 if (lastName == null || lastName.isEmpty()) {
-                    throw new MyException("El apellido no puede ser nulo o estar vacío.");
+                    throw new IllegalArgumentException("El apellido no puede ser nulo o estar vacío.");
                 }
                 break;
             case 3:
                 if (password == null || password.isEmpty()) {
-                    throw new MyException("La contraseña no puede ser nula o estar vacía.");
+                    throw new IllegalArgumentException("La contraseña no puede ser nula o estar vacía.");
                 } else if (password.length() <= 5) {
-                    throw new MyException("La contraseña no puede contener 5 caracteres o menos.");
+                    throw new IllegalArgumentException("La contraseña no puede contener 5 caracteres o menos.");
                 }
                 break;
             case 4:
                 if (!password2.equals(password)) {
-                    throw new MyException("Las contraseñas no coinciden.");
+                    throw new IllegalArgumentException("Las contraseñas no coinciden.");
                 }
                 break;
             case 5:
                 if (address == null || address.isEmpty()) {
-                    throw new MyException("Debe ingresar una direccion");
+                    throw new IllegalArgumentException("Debe ingresar una direccion");
                 }
                 break;
             case 6:
                 if (file == null || file.isEmpty()) {
-                    throw new MyException("Debe ingresar una imagen de perfil.");
+                    throw new IllegalArgumentException("Debe ingresar una imagen de perfil.");
                 }
                 break;
             case 7:
                 if (countryKey == null || countryKey.isEmpty()) {
-                    throw new MyException("Debe ingresar la clave del Barrio.");
+                    throw new IllegalArgumentException("Debe ingresar la clave del Barrio.");
                 } else {
                     validateCountryKey(countryKey);
                 }
                 break;
             case 8:
                 if (email == null || email.isEmpty()) {
-                    throw new MyException("Debe ingresar un correo");
+                    throw new IllegalArgumentException("Debe ingresar un correo");
                 } else if (!email.contains("@")) {
-                    throw new MyException("El correo debe poseer '@'");
+                    throw new IllegalArgumentException("El correo debe poseer '@'");
                 } else if (email.substring(email.length() - 1).equals("@")) {
-                    throw new MyException("El correo debe poseer caracteres luego de la '@'");
+                    throw new IllegalArgumentException("El correo debe poseer caracteres luego de la '@'");
                 }
                 break;
         }
     }
 
-    private String validateCountryKey(String countryKey) throws MyException {
+    private String validateCountryKey(String countryKey) throws IllegalArgumentException {
 
         String[] claves = new String[3];
 
@@ -259,7 +258,7 @@ public class UserService implements UserDetailsService {
             }
         }
         if (count == 3) {
-            throw new MyException("La contraseña del barrio es incorrecta.");
+            throw new IllegalArgumentException("La contraseña del barrio es incorrecta.");
         }
         return countryKey;
     }
@@ -297,7 +296,7 @@ public class UserService implements UserDetailsService {
             user.activateUser();
             userRepository.save(user);
         } else {
-            throw new EntityNotFoundException("No se encontró al usuario con ese id.");
+            throw new EntityNotFoundException(CustomUser.class, id);
         }
     }
 

@@ -1,11 +1,10 @@
 package com.egg.expertfinder.controller;
 
 import com.egg.expertfinder.entity.CustomUser;
-import com.egg.expertfinder.exception.MyException;
+import com.egg.expertfinder.exception.EntityNotFoundException;
 import com.egg.expertfinder.service.UserService;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -39,7 +38,7 @@ public class UserController {
             CustomUser user = userService.getUserById(id);
             model.addAttribute("user", user);
             return "user-update.html";
-        } catch (Exception ex) {
+        } catch (IllegalArgumentException ex) {
             model.put("error", ex.getMessage());
             return "user-update.html";
         }
@@ -49,12 +48,12 @@ public class UserController {
     @PostMapping("/update") // /user/update
     public String updateUser(@RequestParam Long id, @RequestParam(required = false) String name,
             @RequestParam(required = false) String lastName, @RequestParam(required = false) String email,
-            @RequestParam(required = false) MultipartFile file, ModelMap model) throws Exception {
+            @RequestParam(required = false) MultipartFile file, ModelMap model) throws IllegalArgumentException {
         try {
             userService.updateUser(id, name, lastName, email, file);
             model.put("exito", "El Usuario se modificó correctamente.");
             return "redirect:/home";
-        } catch (MyException e) {
+        } catch (IllegalArgumentException e) {
             model.put("error", e.getMessage());
             model.addAttribute("user", userService.getUserById(id));
             return "user-update.html";
@@ -68,7 +67,7 @@ public class UserController {
             CustomUser user = userService.getUserById(id);
             model.addAttribute("user", user);
             return "user-details.html";
-        } catch (Exception ex) {
+        } catch (IllegalArgumentException ex) {
             model.addAttribute("error", ex.getMessage());
             return "redirect:/home";
         }
@@ -97,7 +96,7 @@ public class UserController {
             userService.deleteUser(id);
             model.put("exito", "Se eliminó el usuario correctamente.");
             return "redirect:/admin/dashboard";
-        } catch (Exception ex) {
+        } catch (IllegalArgumentException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/admin/dashboard";
         }
@@ -110,7 +109,7 @@ public class UserController {
             userService.deactivateUser(id);
             model.put("exito", "El usuario fué desactivado con éxito.");
             return "redirect:/admin/dashboard";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/admin/dashboard";
         }
@@ -123,7 +122,7 @@ public class UserController {
             userService.activateUser(id);
             model.put("exito", "El usuario fué desactivado con éxito.");
             return "redirect:/admin/dashboard";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/admin/dashboard";
         }

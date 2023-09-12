@@ -2,7 +2,7 @@ package com.egg.expertfinder.service;
 
 import com.egg.expertfinder.entity.Image;
 import com.egg.expertfinder.entity.Job;
-import com.egg.expertfinder.exception.MyException;
+import com.egg.expertfinder.exception.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class JobService {
 
+
     @Autowired
     private JobRepository jobRepository;
 
@@ -21,11 +22,11 @@ public class JobService {
     private ImageService imageService;
 
     @Transactional
-    public void createJob(String name, MultipartFile file) throws MyException {
+    public void createJob(String name, MultipartFile file) throws IllegalArgumentException {
         validate(name, file);
 
         if (jobRepository.findJobByName(name) != null) {
-            throw new MyException("Ya existe este servicio");
+            throw new IllegalArgumentException("Ya existe este servicio");
         }
 
         Job job = new Job(name);
@@ -38,17 +39,17 @@ public class JobService {
     }
 
     @Transactional
-    public void deleteJob(Long id) throws MyException {
+    public void deleteJob(Long id) throws EntityNotFoundException {
         Optional<Job> response = jobRepository.findById(id);
         if (response.isPresent()) {
             jobRepository.delete(response.get());
         } else {
-            throw new MyException("No se encontro el servicio.");
+            throw new EntityNotFoundException(Job.class, id);
         }
     }
 
     @Transactional
-    public void updateJob(Long id, String name, MultipartFile file) throws MyException {
+    public void updateJob(Long id, String name, MultipartFile file) throws EntityNotFoundException {
         Optional<Job> response = jobRepository.findById(id);
         if (response.isPresent()) {
             Job job = response.get();
@@ -62,7 +63,7 @@ public class JobService {
             }
             jobRepository.save(job);
         } else {
-            throw new MyException("No se encontro el servicio.");
+            throw new EntityNotFoundException(Job.class, id);
         }
     }
 
@@ -70,21 +71,21 @@ public class JobService {
         return jobRepository.findAll();
     }
 
-    public Job getJobById(Long id) throws MyException {
+    public Job getJobById(Long id) throws EntityNotFoundException {
         Optional<Job> response = jobRepository.findById(id);
         if (response.isPresent()) {
             return response.get();
         } else {
-            throw new MyException("No se encontró un Servicio con ese ID.");
+            throw new EntityNotFoundException(Job.class, id);
         }
     }
 
-    private void validate(String name, MultipartFile file) throws MyException {
+    private void validate(String name, MultipartFile file) throws IllegalArgumentException {
         if (name == null || name.isEmpty()) {
-            throw new MyException("El nombre del servicio no puede estar vacio.");
+            throw new IllegalArgumentException("El nombre del servicio no puede estar vacio.");
         }
         if (file == null) {
-            throw new MyException("Debe ingresar una imagen para identificar al Servicio.");
+            throw new IllegalArgumentException("Debe ingresar una imagen para identificar al Servicio.");
         }
     }
 }

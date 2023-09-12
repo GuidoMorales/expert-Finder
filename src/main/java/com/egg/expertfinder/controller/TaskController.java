@@ -1,13 +1,11 @@
 package com.egg.expertfinder.controller;
 
 import com.egg.expertfinder.entity.Task;
-import com.egg.expertfinder.enumeration.StatusEnum;
-import com.egg.expertfinder.exception.MyException;
+import com.egg.expertfinder.exception.EntityNotFoundException;
 import com.egg.expertfinder.service.TaskService;
-import java.util.ArrayList;
+
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -32,7 +30,7 @@ public class TaskController {
             taskService.createTask(title, description, idProfessional, idUser);
             model.put("exito", "Se creó la tarea correctamente.");
             return "redirect:/home";
-        } catch (MyException ex) {
+        } catch (IllegalArgumentException ex) {
             model.put("error", ex.getMessage());
             return "task-form.html";
         }
@@ -44,7 +42,7 @@ public class TaskController {
         try {
             model.addAttribute("task", taskService.getTaskById(id));
             return "task-edit.html";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/home";
         }
@@ -59,7 +57,7 @@ public class TaskController {
             taskService.updateTask(id, status);
             model.put("exito", "Se editó la tarea correctamente.");
             return "redirect:/home";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/home";
         }
@@ -72,7 +70,7 @@ public class TaskController {
             Task task = taskService.getTaskById(id);
             model.addAttribute("task", task);
             return "task-details.html";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/home";
         }
@@ -117,7 +115,7 @@ public class TaskController {
             taskService.deleteTaskById(id);
             model.put("exito", "Se eliminó la tarea correctamente.");
             return "redirect:/home";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/home";
         }

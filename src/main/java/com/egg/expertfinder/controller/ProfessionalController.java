@@ -1,12 +1,11 @@
 package com.egg.expertfinder.controller;
 
 import com.egg.expertfinder.entity.Comment;
-import com.egg.expertfinder.entity.CustomUser;
 import com.egg.expertfinder.entity.Professional;
-import com.egg.expertfinder.exception.MyException;
+import com.egg.expertfinder.exception.EntityNotFoundException;
 import com.egg.expertfinder.service.CommentService;
 import com.egg.expertfinder.service.ProfessionalService;
-import com.egg.expertfinder.service.UserService;
+
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,8 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 @Controller
@@ -34,7 +31,7 @@ public class ProfessionalController {
 
     @PreAuthorize("hasRole('ROLE_PRO')")
     @GetMapping("/update/{id}") // /professional/update/{id}
-    public String updateProfessional(@PathVariable Long id, ModelMap model) throws MyException {
+    public String updateProfessional(@PathVariable Long id, ModelMap model) throws IllegalArgumentException {
         Professional professional = professionalService.getProfessionalById(id);
         model.addAttribute("professional", professional);
         return "professional-update.html";
@@ -43,12 +40,12 @@ public class ProfessionalController {
     @PreAuthorize("hasRole('ROLE_PRO')")
     @PostMapping("/update") // /professional/update
     public String updateProfessional(Long id, String name, String lastName, String email,
-            MultipartFile file, String description, String phone, ModelMap model) throws MyException {
+            MultipartFile file, String description, String phone, ModelMap model) throws IllegalArgumentException {
         try {
             professionalService.updateProfessional(id, name, lastName, email, file, description, phone);
             model.put("exito", "El Usuario se modificó correctamente.");
             return "redirect:/home";
-        } catch (MyException ex) {
+        } catch (IllegalArgumentException ex) {
             model.put("error", ex.getMessage());
             model.addAttribute("professional", professionalService.getProfessionalById(id));
             return "professional-update.html";
@@ -81,7 +78,7 @@ public class ProfessionalController {
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_PRO')")
     @GetMapping("/detail/{id}") // /professional/detail/{id}
-    public String profileProfessional(@PathVariable Long id, ModelMap model) throws MyException {
+    public String profileProfessional(@PathVariable Long id, ModelMap model) throws IllegalArgumentException {
         List<Comment> comments = commentService.getCommentsByProfessionalId(id);
         
         model.addAttribute("comments", comments);
@@ -110,7 +107,7 @@ public class ProfessionalController {
             professionalService.deleteProfessional(id);
             model.put("exito", "Se eliminó el Professional Correctamente.");
             return "redirect:/home";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/professional/list";
         }
@@ -123,7 +120,7 @@ public class ProfessionalController {
             professionalService.deactivateProfessional(id);
             model.put("exito", "El usuario se editó con éxito.");
             return "redirect:/admin/dashboard";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/admin/dashboard";
         }
@@ -136,7 +133,7 @@ public class ProfessionalController {
             professionalService.activateProfessional(id);
             model.put("exito", "El usuario se editó con éxito.");
             return "redirect:/admin/dashboard";
-        } catch (MyException ex) {
+        } catch (EntityNotFoundException ex) {
             model.put("error", ex.getMessage());
             return "redirect:/admin/dashboard";
         }
